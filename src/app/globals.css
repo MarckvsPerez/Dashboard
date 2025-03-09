@@ -1,26 +1,155 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer components {
+  .bg-custom-background {
+    background-color: #1A202C;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  .text-custom-secondary {
+    color: #ffffff;
+  }
+  
+  /* Estilos para el fondo turquesa principal */
+  .bg-turquoise {
+    background-color: #00B2B2;
+  }
+  
+  /* Estilos para el hero section */
+  .hero-section {
+    padding-top: 6rem;
+    padding-bottom: 6rem;
+    text-align: center;
+  }
+  
+  .hero-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    max-width: 80rem;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.2;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.75rem;
+    font-weight: 500;
+    margin-top: 1.5rem;
+    margin-bottom: 3rem;
+  }
+  
+  /* Estilos para el separador */
+  .divider {
+    width: 100%;
+    max-width: 80rem;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.3);
+    margin: 4rem auto;
+  }
+  
+  /* Estilos para la sección de servicios */
+  .section-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+  
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 2rem;
+    max-width: 80rem;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 1rem;
+  }
+  
+  @media (min-width: 768px) {
+    .services-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .services-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  
+  .service-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .service-icon {
+    width: 6rem;
+    height: 6rem;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: rotate(45deg);
+    margin-bottom: 1.5rem;
+  }
+  
+  .service-icon-inner {
+    transform: rotate(-45deg);
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  
+  .service-title {
+    font-size: 1.25rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  /* Estilos para la barra de navegación */
+  .navbar {
+    background-color: transparent;
+    color: white;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 50;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+  
+  .navbar-container {
+    max-width: 80rem;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .navbar-logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+  }
+  
+  .navbar-menu {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+  
+  .navbar-link {
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
 }
