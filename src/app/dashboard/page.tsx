@@ -76,15 +76,28 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Filtros de usuario
+  const [verifiedFilter, setVerifiedFilter] = useState<
+    "all" | "verified" | "unverified"
+  >("all");
+  // Filtro de publicaciones
+  const [sponsoredFilter, setSponsoredFilter] = useState<
+    "all" | "sponsored" | "normal"
+  >("all");
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const usersResponse = await axios.get("/api/usuarios/stats");
+        const usersResponse = await axios.get("/api/usuarios/stats", {
+          params: { verifiedFilter },
+        });
         setPopularUsers(usersResponse.data.usuariosPopulares);
         setFollowersRatio(usersResponse.data.relacionSeguidores);
         setVerifiedStatus(usersResponse.data.verificados);
 
-        const postsResponse = await axios.get("/api/publicaciones/stats");
+        const postsResponse = await axios.get("/api/publicaciones/stats", {
+          params: { sponsoredFilter },
+        });
         setInteractions(postsResponse.data.interacciones);
         setHashtags(postsResponse.data.hashtags);
         setEngagement(postsResponse.data.engagement);
@@ -98,7 +111,21 @@ export default function Dashboard() {
     };
 
     fetchData();
-  }, []);
+  }, [verifiedFilter, sponsoredFilter]);
+
+  // Función para manejar cambios en el filtro de usuarios
+  const handleVerifiedFilterChange = (
+    filter: "all" | "verified" | "unverified"
+  ) => {
+    setVerifiedFilter(filter);
+  };
+
+  // Función para manejar cambios en el filtro de publicaciones
+  const handleSponsoredFilterChange = (
+    filter: "all" | "sponsored" | "normal"
+  ) => {
+    setSponsoredFilter(filter);
+  };
 
   return (
     <div className="bg-custom-background">
@@ -117,6 +144,43 @@ export default function Dashboard() {
             title="User Analysis"
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
+            {/* Filtros de usuario */}
+            <div className="flex col-span-1 lg:col-span-2">
+              <div className="bg-gray-800 p-3 rounded-lg flex space-x-4">
+                <span className="self-center">Filter by verification:</span>
+                <button
+                  className={`px-3 py-1 rounded cursor-pointer ${
+                    verifiedFilter === "all"
+                      ? "bg-turquoise"
+                      : "bg-gray-700 hover:bg-gray-600"
+                  }`}
+                  onClick={() => handleVerifiedFilterChange("all")}
+                >
+                  All
+                </button>
+                <button
+                  className={`px-3 py-1 rounded cursor-pointer ${
+                    verifiedFilter === "verified"
+                      ? "bg-turquoise"
+                      : "bg-gray-700 hover:bg-gray-600"
+                  }`}
+                  onClick={() => handleVerifiedFilterChange("verified")}
+                >
+                  Verified
+                </button>
+                <button
+                  className={`px-3 py-1 rounded cursor-pointer ${
+                    verifiedFilter === "unverified"
+                      ? "bg-turquoise"
+                      : "bg-gray-700 hover:bg-gray-600"
+                  }`}
+                  onClick={() => handleVerifiedFilterChange("unverified")}
+                >
+                  Unverified
+                </button>
+              </div>
+            </div>
+
             <div className="col-span-1 lg:col-span-2">
               <ChartContainer title="Popular Users" height="h-96">
                 <BarChart
@@ -136,6 +200,43 @@ export default function Dashboard() {
 
           {/* Post Analysis Section */}
           <ChartSection title="Post Analysis">
+            {/* Filtros de publicaciones */}
+            <div className="col-span-1 lg:col-span-2 flex">
+              <div className="bg-gray-800 p-3 rounded-lg flex space-x-4">
+                <span className="self-center">Filter by sponsorship:</span>
+                <button
+                  className={`px-3 py-1 rounded cursor-pointer ${
+                    sponsoredFilter === "all"
+                      ? "bg-turquoise"
+                      : "bg-gray-700 hover:bg-gray-600"
+                  }`}
+                  onClick={() => handleSponsoredFilterChange("all")}
+                >
+                  All
+                </button>
+                <button
+                  className={`px-3 py-1 rounded cursor-pointer ${
+                    sponsoredFilter === "sponsored"
+                      ? "bg-turquoise"
+                      : "bg-gray-700 hover:bg-gray-600"
+                  }`}
+                  onClick={() => handleSponsoredFilterChange("sponsored")}
+                >
+                  Sponsored
+                </button>
+                <button
+                  className={`px-3 py-1 rounded cursor-pointer ${
+                    sponsoredFilter === "normal"
+                      ? "bg-turquoise"
+                      : "bg-gray-700 hover:bg-gray-600"
+                  }`}
+                  onClick={() => handleSponsoredFilterChange("normal")}
+                >
+                  Normal
+                </button>
+              </div>
+            </div>
+
             <ChartContainer title="Top Posts by Interactions" height="h-96">
               <BarChart
                 data={interactions}

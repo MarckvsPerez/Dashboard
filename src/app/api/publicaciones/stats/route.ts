@@ -1,33 +1,42 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongoose";
 import Publicacion from "@/lib/models/publicacion";
+import { NextRequest } from "next/server";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     await dbConnect();
 
-    const publicaciones = await Publicacion.find().populate(
-      "usuario",
-      "username"
-    );
+    const searchParams = request.nextUrl.searchParams;
+    const sponsoredFilter = searchParams.get("sponsoredFilter") || "all";
 
-    const interaccionesPorPublicacion = publicaciones
-      .map((pub) => ({
-        id: pub._id,
-        usuario: pub.usuario.username,
-        contenido: pub.contenido.substring(0, 30) + "...",
-        likes: pub.likes,
-        comentarios: pub.comentarios,
-        compartidos: pub.compartidos,
-        total: pub.likes + pub.comentarios + pub.compartidos,
-        fecha: pub.fechaPublicacion,
+    let query = {};
+    if (sponsoredFilter === "sponsored") {
+      query = { esPatrocinado: true };
+    } else if (sponsoredFilter === "normal") {
+      query = { esPatrocinado: false };
+    }
+
+    const posts = await Publicacion.find(query).populate("usuario", "username");
+
+    const postInteractions = posts
+      .map((post) => ({
+        id: post._id,
+        usuario: post.usuario.username,
+        contenido: post.contenido.substring(0, 30) + "...",
+        likes: post.likes,
+        comentarios: post.comentarios,
+        compartidos: post.compartidos,
+        total: post.likes + post.comentarios + post.compartidos,
+        fecha: post.fechaPublicacion,
+        esPatrocinado: post.esPatrocinado,
       }))
       .sort((a, b) => b.total - a.total);
 
     const hashtagsMap = {};
-    publicaciones.forEach((pub) => {
-      if (pub.hashtags && pub.hashtags.length > 0) {
-        pub.hashtags.forEach((tag: string) => {
+    posts.forEach((post) => {
+      if (post.hashtags && post.hashtags.length > 0) {
+        post.hashtags.forEach((tag: string) => {
           if (!hashtagsMap[tag as keyof typeof hashtagsMap]) {
             (hashtagsMap as Record<string, number>)[tag] = 0;
           }
@@ -41,103 +50,98 @@ export async function GET() {
       .sort((a, b) => (b.count as number) - (a.count as number))
       .slice(0, 10);
 
-    const engagementPorUsuario = {};
-    publicaciones.forEach((pub) => {
-      const username = pub.usuario.username;
-      if (!(username in engagementPorUsuario)) {
+    const userEngagement = {};
+    posts.forEach((post) => {
+      const username = post.usuario.username;
+      if (!(username in userEngagement)) {
         (
-          engagementPorUsuario as Record<
+          userEngagement as Record<
             string,
             {
-              totalPublicaciones: number;
-              totalInteracciones: number;
-              promedio: number;
+              totalPosts: number;
+              totalInteractions: number;
+              average: number;
             }
           >
         )[username] = {
-          totalPublicaciones: 0,
-          totalInteracciones: 0,
-          promedio: 0,
+          totalPosts: 0,
+          totalInteractions: 0,
+          average: 0,
         };
       }
 
       (
-        engagementPorUsuario as Record<
+        userEngagement as Record<
           string,
           {
-            totalPublicaciones: number;
-            totalInteracciones: number;
-            promedio: number;
+            totalPosts: number;
+            totalInteractions: number;
+            average: number;
           }
         >
-      )[username].totalPublicaciones += 1;
-      const interacciones = pub.likes + pub.comentarios + pub.compartidos;
+      )[username].totalPosts += 1;
+      const interactions = post.likes + post.comentarios + post.compartidos;
       (
-        engagementPorUsuario as Record<
+        userEngagement as Record<
           string,
           {
-            totalPublicaciones: number;
-            totalInteracciones: number;
-            promedio: number;
+            totalPosts: number;
+            totalInteractions: number;
+            average: number;
           }
         >
-      )[username].totalInteracciones += interacciones;
+      )[username].totalInteractions += interactions;
     });
 
-    Object.keys(engagementPorUsuario).forEach((username) => {
-      const usuario = (
-        engagementPorUsuario as Record<
+    Object.keys(userEngagement).forEach((username) => {
+      const user = (
+        userEngagement as Record<
           string,
           {
-            totalPublicaciones: number;
-            totalInteracciones: number;
-            promedio: number;
+            totalPosts: number;
+            totalInteractions: number;
+            average: number;
           }
         >
       )[username];
-      usuario.promedio =
-        usuario.totalInteracciones / usuario.totalPublicaciones;
+      user.average = user.totalInteractions / user.totalPosts;
     });
 
-    const engagementArray = Object.entries(engagementPorUsuario)
+    const engagementArray = Object.entries(userEngagement)
       .map(([username, stats]) => ({
         username,
         ...(stats as {
-          totalPublicaciones: number;
-          totalInteracciones: number;
-          promedio: number;
+          totalPosts: number;
+          totalInteractions: number;
+          average: number;
         }),
       }))
-      .sort((a, b) => b.promedio - a.promedio);
+      .sort((a, b) => b.average - a.average);
 
-    const datosInteracciones = {
-      labels: interaccionesPorPublicacion
+    const interactionsData = {
+      labels: postInteractions
         .slice(0, 5)
-        .map((pub) => `@${pub.usuario}`),
+        .map((post) => `@${post.usuario}${post.esPatrocinado ? " (P)" : ""}`),
       datasets: [
         {
           label: "Likes",
-          data: interaccionesPorPublicacion.slice(0, 5).map((pub) => pub.likes),
+          data: postInteractions.slice(0, 5).map((post) => post.likes),
           backgroundColor: "rgba(255, 99, 132, 0.6)",
         },
         {
           label: "Comments",
-          data: interaccionesPorPublicacion
-            .slice(0, 5)
-            .map((pub) => pub.comentarios),
+          data: postInteractions.slice(0, 5).map((post) => post.comentarios),
           backgroundColor: "rgba(54, 162, 235, 0.6)",
         },
         {
           label: "Shared",
-          data: interaccionesPorPublicacion
-            .slice(0, 5)
-            .map((pub) => pub.compartidos),
+          data: postInteractions.slice(0, 5).map((post) => post.compartidos),
           backgroundColor: "rgba(255, 206, 86, 0.6)",
         },
       ],
     };
 
-    const datosHashtags = {
+    const hashtagsData = {
       labels: hashtagsArray.map((item) => `#${item.tag}`),
       datasets: [
         {
@@ -148,12 +152,12 @@ export async function GET() {
       ],
     };
 
-    const datosEngagement = {
+    const engagementData = {
       labels: engagementArray.map((item) => `@${item.username}`),
       datasets: [
         {
           label: "Average interactions per post",
-          data: engagementArray.map((item) => item.promedio),
+          data: engagementArray.map((item) => item.average),
           borderColor: "rgb(153, 102, 255)",
           backgroundColor: "rgba(153, 102, 255, 0.5)",
           tension: 0.1,
@@ -162,9 +166,9 @@ export async function GET() {
     };
 
     return NextResponse.json({
-      interacciones: datosInteracciones,
-      hashtags: datosHashtags,
-      engagement: datosEngagement,
+      interacciones: interactionsData,
+      hashtags: hashtagsData,
+      engagement: engagementData,
     });
   } catch (error) {
     console.error("Error al obtener estadísticas de publicaciones:", error);

@@ -5,15 +5,10 @@ type LoadingErrorProps = {
   error: string | null;
 };
 
-/**
- * Component to handle loading and error states
- * @param loading - Whether data is currently loading
- * @param error - Error message if any
- */
 const LoadingError = ({ loading, error }: LoadingErrorProps) => {
   if (loading) {
     return (
-      <div className="py-12 flex justify-center">
+      <div className="py-12 flex justify-center h-screen">
         <p className="text-gray-600">Loading data...</p>
       </div>
     );
