@@ -126,7 +126,6 @@ const UsuarioForm = ({ formData, handleInputChange }: UsuarioFormProps) => {
   );
 };
 
-// Componente de formulario para Publicaciones
 type PublicacionFormProps = {
   formData: PublicacionFormData;
   handleInputChange: (
@@ -268,7 +267,6 @@ export default function Tables() {
     (IUsuario & WithId) | (IPublicacion & WithId) | null
   >(null);
 
-  // Estados separados para cada tipo de formulario
   const [usuarioFormData, setUsuarioFormData] = useState<UsuarioFormData>({
     nombre: "",
     apellido: "",
@@ -323,7 +321,6 @@ export default function Tables() {
     setCurrentItem(item);
 
     if ("username" in item) {
-      // Es un usuario
       const usuario = item as IUsuario;
       setUsuarioFormData({
         nombre: usuario.nombre,
@@ -334,7 +331,6 @@ export default function Tables() {
         esVerificado: usuario.esVerificado,
       });
     } else {
-      // Es una publicación
       const publicacion = item as IPublicacion;
       setPublicacionFormData({
         contenido: publicacion.contenido,
