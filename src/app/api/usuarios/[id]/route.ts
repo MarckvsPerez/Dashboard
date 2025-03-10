@@ -1,13 +1,16 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongoose";
 import Usuario from "@/lib/models/usuario";
+import Publicacion from "@/lib/models/publicacion";
 
 export async function DELETE(
-  _request: Request,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
+    const params = await context.params;
+
     const usuarioEliminado = await Usuario.findByIdAndDelete(params.id);
 
     if (!usuarioEliminado) {
@@ -17,7 +20,12 @@ export async function DELETE(
       );
     }
 
-    return NextResponse.json({ success: true });
+    await Publicacion.deleteMany({ usuario: params.id });
+
+    return NextResponse.json({
+      success: true,
+      message: "Usuario y sus publicaciones eliminados correctamente",
+    });
   } catch (error) {
     console.error("Error al eliminar usuario:", error);
     return NextResponse.json(
@@ -28,12 +36,13 @@ export async function DELETE(
 }
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
     const data = await request.json();
+    const params = await context.params;
 
     const usuarioActualizado = await Usuario.findByIdAndUpdate(
       params.id,
@@ -57,3 +66,5 @@ export async function PUT(
     );
   }
 }
+
+export const dynamic = "force-dynamic";

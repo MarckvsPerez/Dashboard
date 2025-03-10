@@ -1,14 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongoose";
 import Publicacion from "@/lib/models/publicacion";
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
     const data = await request.json();
+    const params = await context.params;
 
     const publicacionActualizada = await Publicacion.findByIdAndUpdate(
       params.id,
@@ -36,11 +37,13 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
+    const params = await context.params;
+
     const publicacionEliminada = await Publicacion.findByIdAndDelete(params.id);
 
     if (!publicacionEliminada) {
@@ -59,3 +62,5 @@ export async function DELETE(
     );
   }
 }
+
+export const dynamic = "force-dynamic";
