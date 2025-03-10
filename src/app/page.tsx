@@ -116,26 +116,10 @@ const SocialCard = ({ item }: { item: SocialData }) => {
 };
 
 const LoadingFallback = () => (
-  <div className="text-center py-10">
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{
-        duration: 0.5,
-        repeat: Infinity,
-        repeatType: "reverse",
-      }}
-      className="text-xl"
-    >
-      Loading...
-    </motion.div>
-  </div>
+  <div className="text-center py-10">Loading...</div>
 );
 
 export default function Home() {
-  const titleRef = useRef(null);
-  const isTitleInView = useInView(titleRef, { once: true, amount: 0.5 });
-
   return (
     <div className="bg-turquoise text-white">
       {/* Hero Section */}
@@ -201,17 +185,9 @@ export default function Home() {
 
       {/* Social Media Posts Section */}
       <div className="py-16 px-4">
-        <motion.h2
-          ref={titleRef}
-          className="text-3xl font-bold uppercase text-center mb-10"
-          initial={{ opacity: 0, y: -30 }}
-          animate={
-            isTitleInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -30 }
-          }
-          transition={{ duration: 0.7, ease: "easeOut" }}
-        >
+        <h2 className="text-3xl font-bold uppercase text-center mb-10">
           SOCIAL MEDIA POSTS
-        </motion.h2>
+        </h2>
 
         <Suspense fallback={<LoadingFallback />}>
           <SocialDataGrid />
