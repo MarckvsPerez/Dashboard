@@ -17,3 +17,24 @@ export async function GET() {
     );
   }
 }
+
+export async function POST(request: Request) {
+  try {
+    await dbConnect();
+    const data = await request.json();
+    const nuevaPublicacion = new Publicacion(data);
+    await nuevaPublicacion.save();
+
+    const publicacionPopulada = await Publicacion.findById(nuevaPublicacion._id)
+      .populate("usuario", "username fotoPerfil nombre apellido")
+      .lean();
+
+    return NextResponse.json(publicacionPopulada, { status: 201 });
+  } catch (error) {
+    console.error("Error al crear publicación:", error);
+    return NextResponse.json(
+      { error: "Error al crear publicación" },
+      { status: 500 }
+    );
+  }
+}
